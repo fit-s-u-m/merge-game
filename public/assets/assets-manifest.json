@@ -1,0 +1,54 @@
+{
+  "bundles": [
+    {
+      "name": "default",
+      "assets": []
+    },
+    {
+      "name": "home",
+      "assets": [
+        {
+          "alias": [
+            "home/home-atlas",
+            "home-atlas"
+          ],
+          "src": [
+            "home/home-atlas-YZDUpQ@0.5x.webp.json",
+            "home/home-atlas-WhvtDw@0.5x.png.json",
+            "home/home-atlas-hUGusA.png.json",
+            "home/home-atlas-4GG54g.webp.json"
+          ],
+          "data": {
+            "tags": {
+              "m": true,
+              "tps": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "result",
+      "assets": [
+        {
+          "alias": [
+            "result/result-atlas",
+            "result-atlas"
+          ],
+          "src": [
+            "result/result-atlas-cvTE5g@0.5x.png.json",
+            "result/result-atlas-bHygqg.png.json",
+            "result/result-atlas-7vC4TA.webp.json",
+            "result/result-atlas-1twvyA@0.5x.webp.json"
+          ],
+          "data": {
+            "tags": {
+              "m": true,
+              "tps": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
