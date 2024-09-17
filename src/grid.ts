@@ -10,8 +10,8 @@ export class Grid {
 	constructor(renderer: RENDERER, gridSize: number = 5) {
 		this.renderer = renderer;
 		this.gridSize = gridSize;
-		this.cellSize = 100; // Set cell size
-		this.margin = 15; // Set margin between cells
+		this.cellSize = 180; // Set cell size
+		this.margin = 10; // Set margin between cells
         this.crop = new Crop(renderer); 
 	}
 
@@ -35,7 +35,7 @@ export class Grid {
 		startX: number,
 		startY: number
 	): Promise<SPRITE> {
-		const texturePath = "/assets/ui/Background.jpeg";
+		const texturePath = "/assets/ui/cell-bg-2.png";
 		const texture = await this.renderer.loadAsset(texturePath);
 		const cellSprite = this.renderer.createSprite(texture);
 
@@ -61,14 +61,13 @@ export class Grid {
         const cropType = this.crop.getRandomCropType();
         await this.placeCrop(row, col, cropType);
     }
-    // Method to place a specific crop on the grid
-    async placeCrop(row: number, col: number, cropType: string) {
-        const cropSprite = await this.crop.createCrop(cropType);
-        const xPos = (this.renderer.app.screen.width - this.gridSize * this.cellSize) / 2 + col * (this.cellSize + this.margin);
-        const yPos = (this.renderer.app.screen.height - this.gridSize * this.cellSize) / 2 + row * (this.cellSize + this.margin);
+     // Method to place a specific crop on the grid
+     async placeCrop(row: number, col: number, cropType: string) {
+        // Use the cellSize to ensure all crops are the same size
+        const cropSprite = await this.crop.createCrop(cropType, this.cellSize);
+        const xPos = (this.renderer.app.screen.width - this.gridSize * this.cellSize) / 2 + col * (this.cellSize + this.margin) + this.cellSize / 2;
+        const yPos = (this.renderer.app.screen.height - this.gridSize * this.cellSize) / 2 + row * (this.cellSize + this.margin) + this.cellSize / 2;
         
-        cropSprite.width = this.cellSize;
-        cropSprite.height = this.cellSize;
         cropSprite.position.set(xPos, yPos);
         
         this.renderer.stage(cropSprite);

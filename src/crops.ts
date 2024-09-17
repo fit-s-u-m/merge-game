@@ -8,8 +8,8 @@ export class Crop {
         this.renderer = renderer;
         this.cropTypes = {
             apple: "/assets/ui/apple.png",
-            orange : "/assets/ui/orange.png",
-            lemon : "/assets/ui/lemon.png",
+            orange : "/assets/ui/orange2.png",
+            lemon : "/assets/ui/lemon5.png",
             // Add more crop types here
         };
     }
@@ -21,10 +21,15 @@ export class Crop {
         return await this.renderer.loadAsset(texturePath);
     }
 
-    // Create crop sprite
-    async createCrop(type: string): Promise<SPRITE> {
+     // Create crop sprite
+     async createCrop(type: string, size: number): Promise<SPRITE> {
         const texture = await this.loadCropTexture(type);
         const cropSprite = this.renderer.createSprite(texture);
+
+          // Set uniform size for the crop texture
+          cropSprite.width = size * 0.6; // Slightly smaller to fit within the cell
+          cropSprite.height = size * 0.6;
+          cropSprite.anchor.set(0.5, 0.5);
         return cropSprite;
     }
         // Method to get a random crop type
