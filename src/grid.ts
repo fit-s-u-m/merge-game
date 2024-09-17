@@ -5,21 +5,20 @@ export class Grid {
 	gridSize: number;
 	cellSize: number;
 	margin: number; // Space between cells
-    crop: Crop; 
+	crop: Crop;
 
 	constructor(renderer: RENDERER, gridSize: number = 5) {
 		this.renderer = renderer;
 		this.gridSize = gridSize;
-		this.cellSize = 180; // Set cell size
-		this.margin = 10; // Set margin between cells
-        this.crop = new Crop(renderer); 
+		this.cellSize = 200;
+		this.margin = 15;
+		this.crop = new Crop(renderer);
 	}
 
 	async init() {
 		const totalGridWidth = this.gridSize * this.cellSize;
 		const totalGridHeight = this.gridSize * this.cellSize;
 
-		// Calculate the starting x and y positions to center the grid
 		const startX = (this.renderer.app.screen.width - totalGridWidth) / 2;
 		const startY = (this.renderer.app.screen.height - totalGridHeight) / 2;
 
@@ -41,35 +40,42 @@ export class Grid {
 
 		cellSprite.width = this.cellSize;
 		cellSprite.height = this.cellSize;
-		// Set position with offset to center the grid and add margin for spacing
+
 		const xPos = startX + col * (this.cellSize + this.margin);
 		const yPos = startY + row * (this.cellSize + this.margin);
 
 		cellSprite.position.set(xPos, yPos);
 		this.renderer.stage(cellSprite);
 
-
-             // Randomly place crops on the grid
-             await this.placeRandomCrop(row, col);
-
+		await this.placeRandomCrop(row, col);
 
 		return cellSprite;
 	}
 
-    // Method to place a random crop on the grid
-    async placeRandomCrop(row: number, col: number) {
-        const cropType = this.crop.getRandomCropType();
-        await this.placeCrop(row, col, cropType);
-    }
-     // Method to place a specific crop on the grid
-     async placeCrop(row: number, col: number, cropType: string) {
-        // Use the cellSize to ensure all crops are the same size
-        const cropSprite = await this.crop.createCrop(cropType, this.cellSize);
-        const xPos = (this.renderer.app.screen.width - this.gridSize * this.cellSize) / 2 + col * (this.cellSize + this.margin) + this.cellSize / 2;
-        const yPos = (this.renderer.app.screen.height - this.gridSize * this.cellSize) / 2 + row * (this.cellSize + this.margin) + this.cellSize / 2;
-        
-        cropSprite.position.set(xPos, yPos);
-        
-        this.renderer.stage(cropSprite);
-    }
+	// random crop on the grid
+	async placeRandomCrop(row: number, col: number) {
+		const cropType = this.crop.getRandomCropType();
+		await this.placeCrop(row, col, cropType);
+	}
+	// place a specific crop on the grid
+	async placeCrop(row: number, col: number, cropType: string) {
+		// Use the cellSize to ensure all crops are the same size
+		const cropSprite = await this.renderer.createCropSprite(
+			this.crop,
+			cropType,
+			this.cellSize
+		);
+		const xPos =
+			(this.renderer.app.screen.width - this.gridSize * this.cellSize) / 2 +
+			col * (this.cellSize + this.margin) +
+			this.cellSize / 2;
+		const yPos =
+			(this.renderer.app.screen.height - this.gridSize * this.cellSize) / 2 +
+			row * (this.cellSize + this.margin) +
+			this.cellSize / 2;
+
+		cropSprite.position.set(xPos, yPos);
+		this.renderer.makeDraggable(this.crop, cropSprite);
+		this.renderer.stage(cropSprite);
+	}
 }
