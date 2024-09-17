@@ -52,14 +52,12 @@ export class Grid {
 		return cellSprite;
 	}
 
-	// random crop on the grid
 	async placeRandomCrop(row: number, col: number) {
 		const cropType = this.crop.getRandomCropType();
 		await this.placeCrop(row, col, cropType);
 	}
-	// place a specific crop on the grid
+
 	async placeCrop(row: number, col: number, cropType: string) {
-		// Use the cellSize to ensure all crops are the same size
 		const cropSprite = await this.renderer.createCropSprite(
 			this.crop,
 			cropType,

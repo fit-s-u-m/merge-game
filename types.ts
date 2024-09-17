@@ -3,11 +3,11 @@ import { Renderer } from "./src/renderer";
 import { Grid } from "./src/grid";
 
 // Extend PIXI.Sprite to include custom properties
-export interface ExtendedSprite extends PIXI.Sprite {   
-    data?: PIXI.FederatedPointerEvent | null; // Include nullability
+export interface ExtendedSprite extends PIXI.Sprite {
+	data?: PIXI.FederatedPointerEvent | null;
 	dragging?: boolean;
-	originalPosition?: { x: number; y: number }; // Add originalPosition property
-	dragOffset?: { x: number; y: number }; // Add dragOffset property
+	originalPosition?: { x: number; y: number };
+	dragOffset?: { x: number; y: number };
 }
 
 export type ELEMENT = PIXI.Sprite | PIXI.Text | PIXI.Container | PIXI.Graphics;
@@ -15,7 +15,7 @@ export type RENDERER = Renderer;
 export type SPRITE = ExtendedSprite;
 export type TEXTURE = PIXI.Texture;
 export type TEXT = PIXI.Text;
-export type EVENT = any; // TODO: find the correct type for event
+export type EVENT = any;
 export type CANDYINFO = {
 	x: number;
 	y: number;
