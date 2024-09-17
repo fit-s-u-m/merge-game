@@ -2,8 +2,8 @@ import { Container, NineSliceSprite, Texture } from 'pixi.js';
 import gsap from 'gsap';
 import { waitFor } from '../utils/asyncUtils';
 import { registerCustomEase } from '../utils/animation';
-// import { navigation } from '../utils/navigation';
-// import { GameScreen } from './GameScreen';
+import { navigation } from '../utils/navigation';
+import { GameScreen } from './GameScreen';
 // import { i18n } from '../utils/i18n';
 import { LargeButton } from '../ui/LargeButton';
 import { Logo } from '../ui/Logo';
@@ -28,13 +28,13 @@ export class HomeScreen extends Container {
 	/** Button that leads to gameplay */
 	private playButton: LargeButton;
 	/** Button that links to the Github project */
-	private githubButton: SmallButton;
-	/** Button that links to the PixiJS page */
-	private pixiButton: ImageButton;
-	/** Button that opens the info panel */
-	private infoButton: RippleButton;
-	/** Button that opens the settings panel */
-	private settingsButton: RippleButton;
+	// private githubButton: SmallButton;
+	// /** Button that links to the PixiJS page */
+	// private pixiButton: ImageButton;
+	// /** Button that opens the info panel */
+	// private infoButton: RippleButton;
+	// /** Button that opens the settings panel */
+	// private settingsButton: RippleButton;
 	/** The footer base, also used for transition in */
 	private base: NineSliceSprite;
 
@@ -80,7 +80,7 @@ export class HomeScreen extends Container {
 		// this.pixiButton.onPress.connect(() => window.open(i18n.urlPixi, 'blank'));
 		// this.addChild(this.pixiButton);
 		//
-		this.playButton = new LargeButton({ text: i18n.playButton });
+		this.playButton = new LargeButton({ text: "play" });
 		this.playButton.onPress.connect(() => navigation.showScreen(GameScreen));
 		this.addChild(this.playButton);
 	}
@@ -95,26 +95,13 @@ export class HomeScreen extends Container {
 		this.base.y = height - 140;
 		this.logo.x = width * 0.5;
 		this.logo.y = height * 0.2;
-		this.githubButton.x = width - 50;
-		this.githubButton.y = height - 40;
-		this.pixiButton.x = 50;
-		this.pixiButton.y = height - 40;
-		this.infoButton.x = 30;
-		this.infoButton.y = 30;
-		this.settingsButton.x = width - 30;
-		this.settingsButton.y = 30;
 	}
 
 	/** Show screen with animations */
 	public async show() {
-		bgm.play('common/bgm-main.mp3', { volume: 0.7 });
 
 		// Reset visual state, hide things that will show up later
 		this.playButton.hide(false);
-		this.pixiButton.hide(false);
-		this.infoButton.hide(false);
-		this.settingsButton.hide(false);
-		this.githubButton.hide(false);
 		// this.dragon.show(false);
 		this.logo.show(false);
 
@@ -125,18 +112,11 @@ export class HomeScreen extends Container {
 		await waitFor(0.5);
 		await this.playButton.show();
 		this.interactiveChildren = true;
-		// this.infoButton.show();
-		await this.settingsButton.show();
-		this.pixiButton.show();
-		await this.githubButton.show();
 	}
 
 	/** Hide screen with animations */
 	public async hide() {
 		this.playButton.hide();
-		this.pixiButton.hide();
-		this.githubButton.hide();
-		this.infoButton.hide();
 		await waitFor(0.1);
 		gsap.to(this.base.pivot, { y: -200, duration: 0.3, ease: 'back.in' });
 		await waitFor(0.1);

@@ -1,4 +1,7 @@
 import { Application } from 'pixi.js';
+import { navigation } from './utils/navigation';
+import { initAssets } from './utils/assets';
+import { HomeScreen } from './screens/HomeScreen';
 export const app = new Application();
 
 function resize() {
@@ -28,10 +31,10 @@ function resize() {
 /** Fire when document visibility changes - lose or regain focus */
 function visibilityChange() {
 	if (document.hidden) {
-		sound.pauseAll();
+		// sound.pauseAll();
 		navigation.blur();
 	} else {
-		sound.resumeAll();
+		// sound.resumeAll();
 		navigation.focus();
 	}
 }
@@ -42,6 +45,7 @@ async function init() {
 		resolution: Math.max(window.devicePixelRatio, 2),
 		backgroundColor: 0xffffff,
 	});
+	console.log("hit ")
 
 	// Add pixi canvas element (app.canvas) to the document's body
 	document.body.appendChild(app.canvas);
@@ -49,33 +53,40 @@ async function init() {
 	// Whenever the window resizes, call the 'resize' function
 	window.addEventListener('resize', resize);
 
+	console.log("before resize")
 	// Trigger the first resize
 	resize();
+	console.log("after resize")
 
 	// Add a visibility listener, so the app can pause sounds and screens
 	document.addEventListener('visibilitychange', visibilityChange);
 
+	console.log("loading assets ")
 	// Setup assets bundles (see assets.ts) and start up loading everything in background
 	await initAssets();
+	console.log("finished loading assets ")
 
 	// Add a persisting background shared by all screens
-	navigation.setBackground(TiledBackground);
+	// navigation.setBackground(TiledBackground);
 
 	// Show initial loading screen
-	await navigation.showScreen(LoadScreen);
+	// await navigation.showScreen(LoadScreen);
 
+	await navigation.showScreen(HomeScreen);
+	// Init everything
 	// Go to one of the screens if a shortcut is present in url params, otherwise go to home screen
-	if (getUrlParam('game') !== null) {
-		await navigation.showScreen(GameScreen);
-	} else if (getUrlParam('load') !== null) {
-		await navigation.showScreen(LoadScreen);
-	} else if (getUrlParam('result') !== null) {
-		await navigation.showScreen(ResultScreen);
-	} else {
-		await navigation.showScreen(HomeScreen);
-	}
+	// 	if (getUrlParam('game') !== null) {
+	// 		await navigation.showScreen(GameScreen);
+	// 	} else if (getUrlParam('load') !== null) {
+	// 		await navigation.showScreen(LoadScreen);
+	// 	} else if (getUrlParam('result') !== null) {
+	// 		await navigation.showScreen(ResultScreen);
+	// 	} else {
+	// 		await navigation.showScreen(HomeScreen);
+	// 	}
+	// }
+	//
 }
-
 // Init everything
 init();
 
