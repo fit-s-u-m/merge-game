@@ -4,6 +4,7 @@ import { Crop } from "./crops";
 
 export class Renderer {
 	app: PIXI.Application;
+	dragger: any
 
 	constructor() {
 		this.app = new PIXI.Application();
@@ -16,6 +17,13 @@ export class Renderer {
 		});
 		this.app.stage.eventMode = "static";
 		this.app.stage.hitArea = this.app.screen;
+
+		this.app.stage.on("pointerup", () => {
+			if (this.dragger) this.dragger.endDrag();
+		});
+		this.app.stage.on("pointerupoutside", () => {
+			if (this.dragger) this.dragger.endDrag();
+		});
 
 		document.body.appendChild(this.app.canvas);
 
@@ -80,8 +88,5 @@ export class Renderer {
 
 		sprite
 			.on("pointerdown", (event) => crop.startDrag(sprite, event))
-			.on("pointerup", () => crop.endDrag(sprite))
-			.on("pointerupoutside", () => crop.endDrag(sprite))
-			.on("pointermove", () => crop.moveDrag(sprite));
 	}
 }

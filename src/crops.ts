@@ -3,6 +3,7 @@ import { RENDERER, SPRITE } from "../types";
 export class Crop {
 	renderer: RENDERER;
 	cropTypes: { [key: string]: string };
+	dragTarget: any
 
 	constructor(renderer: RENDERER) {
 		this.renderer = renderer;
@@ -31,27 +32,35 @@ export class Crop {
 		sprite.data = event.data;
 		sprite.dragging = true;
 		sprite.alpha = 0.5;
+		this.renderer.dragger = this
+		this.dragTarget = sprite
 
 		sprite.originalPosition = { x: sprite.x, y: sprite.y };
+		if (!sprite.data) return
 
 		const newPosition = sprite.data.getLocalPosition(sprite.parent);
 		sprite.dragOffset = {
 			x: sprite.x - newPosition.x,
 			y: sprite.y - newPosition.y,
 		};
+		this.renderer.app.stage.on("pointermove", () => { this.moveDrag(sprite) })
 	}
 
-	endDrag(sprite: SPRITE) {
-		sprite.dragging = false;
-		sprite.data = undefined;
-		sprite.alpha = 1;
+	endDrag() {
+		if (!this.dragTarget) return
+		this.dragTarget.dragging = false;
+		this.dragTarget.data = undefined;
+		this.dragTarget.alpha = 1;
+		console.log("hi")
 
-		if (sprite.originalPosition) {
-			sprite.position.set(
-				sprite.originalPosition.x,
-				sprite.originalPosition.y
+		if (this.dragTarget.originalPosition) {
+			this.dragTarget.position.set(
+				this.dragTarget.originalPosition.x,
+				this.dragTarget.originalPosition.y
 			);
 		}
+		this.dragTarget = null
+		this.renderer.app.stage.off("pointermove", () => { this.moveDrag(this.dragTarget) })
 	}
 
 	moveDrag(sprite: SPRITE) {
