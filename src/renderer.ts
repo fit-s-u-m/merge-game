@@ -1,6 +1,11 @@
 import * as PIXI from "pixi.js";
 import { ELEMENT, SPRITE } from "../types.ts";
 import { Crop } from "./crops";
+import { PixiPlugin } from "gsap/PixiPlugin";
+import gsap from "gsap";
+
+PixiPlugin.registerPIXI(PIXI);
+gsap.registerPlugin(PixiPlugin)
 
 export class Renderer {
 	app: PIXI.Application;

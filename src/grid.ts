@@ -1,11 +1,15 @@
 import { RENDERER, SPRITE } from "../types";
 import { Crop } from "./crops";
+import gsap from "gsap";
+
 export class Grid {
 	renderer: RENDERER;
 	gridSize: number;
 	cellSize: number;
 	margin: number; // Space between cells
 	crop: Crop;
+	startX: number
+	startY: number
 
 	constructor(renderer: RENDERER, gridSize: number = 5) {
 		this.renderer = renderer;
@@ -13,18 +17,18 @@ export class Grid {
 		this.cellSize = 200;
 		this.margin = 15;
 		this.crop = new Crop(renderer);
-	}
-
-	async init() {
 		const totalGridWidth = this.gridSize * this.cellSize;
 		const totalGridHeight = this.gridSize * this.cellSize;
 
-		const startX = (this.renderer.app.screen.width - totalGridWidth) / 2;
-		const startY = (this.renderer.app.screen.height - totalGridHeight) / 2;
+		this.startX = (this.renderer.app.screen.width - totalGridWidth) / 2;
+		this.startY = (this.renderer.app.screen.height - totalGridHeight) / 2;
+	}
+
+	async init() {
 
 		for (let row = 0; row < this.gridSize; row++) {
 			for (let col = 0; col < this.gridSize; col++) {
-				await this.createGridCell(row, col, startX, startY);
+				await this.createGridCell(row, col, this.startX, this.startY);
 			}
 		}
 	}
@@ -47,14 +51,16 @@ export class Grid {
 		cellSprite.position.set(xPos, yPos);
 		this.renderer.stage(cellSprite);
 
-		await this.placeRandomCrop(row, col);
+
+		if (Math.random() > 0.5) // random
+			await this.placeRandomCrop(row, col);
 
 		return cellSprite;
 	}
 
 	async placeRandomCrop(row: number, col: number) {
-		const cropType = this.crop.getRandomCropType();
-		await this.placeCrop(row, col, cropType);
+		// const cropType = this.crop.getRandomCropType();
+		await this.placeCrop(row, col, "lemon");
 	}
 
 	async placeCrop(row: number, col: number, cropType: string) {
@@ -71,8 +77,9 @@ export class Grid {
 			(this.renderer.app.screen.height - this.gridSize * this.cellSize) / 2 +
 			row * (this.cellSize + this.margin) +
 			this.cellSize / 2;
+		gsap.to(cropSprite, { duration: 2, pixi: { positionX: xPos, positionY: yPos } })
 
-		cropSprite.position.set(xPos, yPos);
+		// cropSprite.position.set(xPos, yPos);
 		this.renderer.makeDraggable(this.crop, cropSprite);
 		this.renderer.stage(cropSprite);
 	}

@@ -32,6 +32,7 @@ export class Crop {
 		sprite.data = event.data;
 		sprite.dragging = true;
 		sprite.alpha = 0.5;
+		sprite.zIndex = 50;
 		this.renderer.dragger = this
 		this.dragTarget = sprite
 
@@ -51,14 +52,14 @@ export class Crop {
 		this.dragTarget.dragging = false;
 		this.dragTarget.data = undefined;
 		this.dragTarget.alpha = 1;
-		console.log("hi")
+		this.dragTarget.zindex = 0;
 
-		if (this.dragTarget.originalPosition) {
-			this.dragTarget.position.set(
-				this.dragTarget.originalPosition.x,
-				this.dragTarget.originalPosition.y
-			);
-		}
+		// if (this.dragTarget.originalPosition) {
+		// 	this.dragTarget.position.set(
+		// 		this.dragTarget.originalPosition.x,
+		// 		this.dragTarget.originalPosition.y
+		// 	);
+		// }
 		this.dragTarget = null
 		this.renderer.app.stage.off("pointermove", () => { this.moveDrag(this.dragTarget) })
 	}
