@@ -8,9 +8,9 @@ export class Crop {
 	constructor(renderer: RENDERER) {
 		this.renderer = renderer;
 		this.cropTypes = {
-			apple: "/assets/ui/apple.png",
-			orange: "/assets/ui/orange2.png",
-			lemon: "/assets/ui/lemon5.png",
+			apple: "/assets/ui/crops/apple.png",
+			orange: "/assets/ui/crops/orange2.png",
+			lemon: "/assets/ui/crops/lemon5.png",
 		};
 	}
 	setGridInfo(gridInfo: GRIDINFO) {
