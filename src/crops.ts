@@ -12,7 +12,16 @@ export class Crop {
 		this.grid = grid
 	}
 	initAssets() {
-		return Promise.all(this.renderer.loadAssets("/assets/ui/apple.png", "/assets/ui/orange2.png", "/assets/ui/lemon5.png"))
+		return Promise.all(this.renderer.loadAssets(
+			"/assets/ui/crops/apple.png",
+			"/assets/ui/crops/orange2.png",
+			"/assets/ui/crops/lemon5.png",
+			"/assets/ui/crops/capsicum.png",
+			"/assets/ui/crops/carrot.png",
+			"/assets/ui/crops/egg-plant.png",
+			"/assets/ui/crops/mango.png",
+			"/assets/ui/crops/strawberry.png",
+		))
 	}
 	setGridInfo(gridInfo: GRIDINFO) {
 		this.gridInfo = gridInfo

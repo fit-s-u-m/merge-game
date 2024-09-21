@@ -16,7 +16,7 @@ export class Grid {
 	constructor(renderer: RENDERER, gridSize: number = 5) {
 		this.renderer = renderer;
 		this.gridSize = gridSize;
-		this.cellSize = 150	;
+		this.cellSize = 150;
 		this.margin = 15;
 		const totalGridWidth = this.gridSize * this.cellSize;
 		const totalGridHeight = this.gridSize * this.cellSize;
