@@ -53,6 +53,9 @@ export class Renderer {
 		overlay.zIndex = -9;
 		this.stage(overlay);
 	}
+	createContainer() {
+		return new PIXI.Container()
+	}
 
 	async loadAsset(path: string): Promise<PIXI.Texture> {
 		return await PIXI.Assets.load(path);
@@ -76,7 +79,6 @@ export class Renderer {
 	createCropSprite(
 		crop: Crop,
 		texture: TEXTURE,
-		size: number
 	) {
 		const sprite = this.createSprite(texture);
 

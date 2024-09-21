@@ -1,4 +1,4 @@
-import { GRIDINFO, RENDERER, TEXTURE } from "../types";
+import { GRIDINFO, RENDERER, SPRITE, TEXTURE } from "../types";
 import { Crop } from "./crops";
 import gsap from "gsap";
 
@@ -12,6 +12,7 @@ export class Grid {
 	startY: number
 	private grid: (size: number) => GRIDINFO = (size: number) => Array.from({ length: size }, () => Array(size).fill(0));
 	gridInfo: GRIDINFO
+	cropCells: SPRITE[] = []
 
 	constructor(renderer: RENDERER, gridSize: number = 5) {
 		this.renderer = renderer;
@@ -56,6 +57,7 @@ export class Grid {
 		const yPos = startY + row * (this.cellSize + this.margin);
 
 		cellSprite.position.set(xPos, yPos);
+		this.cropCells.push(cellSprite)
 		this.renderer.stage(cellSprite);
 		this.gridInfo[row][col] = {
 			x: xPos,
@@ -74,7 +76,8 @@ export class Grid {
 	placeCrop(row: number, col: number, cropType: number) {
 		if (!this.crop.cropTypes) return
 		const texture = this.crop.cropTypes[cropType]
-		const cropSprite = this.renderer.createCropSprite(this.crop, texture, this.cellSize)
+		const cropSprite = this.renderer.createCropSprite(this.crop, texture)
+		cropSprite.zIndex = 100
 
 		const xPos = this.gridInfo[row][col].x + this.cellSize / 2
 		const yPos = this.gridInfo[row][col].y + this.cellSize / 2

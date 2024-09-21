@@ -91,16 +91,24 @@ export class Crop {
 
 		const newTargetIndex = this.grid.gridInfo[targetRow][targetCol].fruitId
 		const newTexture = this.cropTypes[newTargetIndex]
+		this.dragTarget.destroy()
 
 		if (this.grid.gridInfo[targetRow][targetCol].fruit) {
-			const tl = gsap.timeline({ ease: "power2.out" })
-			tl.to(this.grid.gridInfo[targetRow][targetCol].fruit, { duration: 0.8, pixi: { scale: 0.7 } }) // animation
+
+			const targets = this.grid.cropCells
+			const arrIndex = (targetRow * this.grid.gridSize) + targetCol
+			gsap.to(targets, {
+				duration: 0.15,
+				ease: "power1.out",
+				pixi: { alpha: 0.7 },
+				stagger: { from: arrIndex, each: 0.08, grid: [5, 5] },
+				repeat: 1,
+				yoyo: true,
+			})
 			this.grid.gridInfo[targetRow][targetCol].fruit.texture = newTexture // swap texture
-			tl.to(this.grid.gridInfo[targetRow][targetCol].fruit, { duration: 0.8, pixi: { scale: 0.6 } }) // animation
 		}
 
 
-		this.dragTarget.destroy()
 		this.grid.gridInfo[row][col].fruitId = -1
 		const randomEmptyCell = this.randomEmptyCell()
 		this.grid.placeCrop(randomEmptyCell.row, randomEmptyCell.col, 0)
@@ -108,6 +116,17 @@ export class Crop {
 
 		this.dragTarget = null
 		this.renderer.app.stage.off("pointermove", () => { this.moveDrag(this.dragTarget) })
+	}
+	getNonEmptyCell(): { row: number, col: number }[] {
+		const gridSize = this.grid.gridSize
+		let cells: { row: number, col: number }[] = []
+		for (let row = 0; row < gridSize; row++) {
+			for (let col = 0; col < gridSize; col++) {
+				if (this.grid.gridInfo[row][col].fruitId != -1)
+					cells.push({ row, col })
+			}
+		}
+		return cells
 	}
 	randomEmptyCell() {
 		const gridSize = this.grid.gridSize
