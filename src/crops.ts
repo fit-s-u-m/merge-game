@@ -1,11 +1,11 @@
-import { GRIDINFO, RENDERER, SPRITE, TEXTURE } from "../types";
+import { RENDERER, SPRITE, TEXTURE } from "../types";
 import { Grid } from "./grid";
+import gsap from "gsap";
 
 export class Crop {
 	renderer: RENDERER;
 	cropTypes?: TEXTURE[]
 	dragTarget: any
-	gridInfo?: GRIDINFO
 	grid: Grid
 	constructor(renderer: RENDERER, grid: Grid) {
 		this.renderer = renderer;
@@ -22,9 +22,6 @@ export class Crop {
 			"/assets/ui/crops/mango.png",
 			"/assets/ui/crops/strawberry.png",
 		))
-	}
-	setGridInfo(gridInfo: GRIDINFO) {
-		this.gridInfo = gridInfo
 	}
 
 	//  starting the drag
@@ -65,14 +62,14 @@ export class Crop {
 		this.dragTarget.alpha = 1;
 		this.dragTarget.zindex = 0;
 
-		if (!this.gridInfo || !this.cropTypes) return
+		if (!this.grid.gridInfo || !this.cropTypes) return
 
-		const localPosX = this.dragTarget.position.x - this.gridInfo[0][0].x
-		const localPosY = this.dragTarget.position.y - this.gridInfo[0][0].y
-		const prevLocalPosX = this.dragTarget.originalPosition.x - this.gridInfo[0][0].x
-		const prevLocalPosY = this.dragTarget.originalPosition.y - this.gridInfo[0][0].y
-		const numRow = this.gridInfo[0].length
-		const cellSize = this.gridInfo[0][0].cellSize
+		const localPosX = this.dragTarget.position.x - this.grid.gridInfo[0][0].x
+		const localPosY = this.dragTarget.position.y - this.grid.gridInfo[0][0].y
+		const prevLocalPosX = this.dragTarget.originalPosition.x - this.grid.gridInfo[0][0].x
+		const prevLocalPosY = this.dragTarget.originalPosition.y - this.grid.gridInfo[0][0].y
+		const numRow = this.grid.gridInfo[0].length
+		const cellSize = this.grid.gridInfo[0][0].cellSize
 		const gridBorder = cellSize * numRow
 		if (localPosX < 0 || localPosY < 0 || localPosY > gridBorder || localPosX > gridBorder) // out of grid
 			return returnToOriginal()
@@ -82,29 +79,47 @@ export class Crop {
 		const targetCol = Math.floor(localPosX / cellSize)
 		const row = Math.floor(prevLocalPosY / cellSize)
 		const col = Math.floor(prevLocalPosX / cellSize)
-		if (targetRow == row && col == targetCol) return returnToOriginal()
+		if (targetRow == row && col == targetCol) return returnToOriginal() // if it is in the same grid cell
+		console.log(targetRow, targetCol)
 
-		const targetIndex = this.gridInfo[targetRow][targetCol].fruitId
-		const currIndex = this.gridInfo[row][col].fruitId
+		const targetIndex = this.grid.gridInfo[targetRow][targetCol].fruitId
+		const currIndex = this.grid.gridInfo[row][col].fruitId
 
 		if (currIndex != targetIndex || targetIndex == -1) return returnToOriginal()
 		if (targetIndex + currIndex < this.cropTypes.length)
-			this.gridInfo[targetRow][targetCol].fruitId += 1
+			this.grid.gridInfo[targetRow][targetCol].fruitId += 1
 
-		const newTargetIndex = this.gridInfo[targetRow][targetCol].fruitId
+		const newTargetIndex = this.grid.gridInfo[targetRow][targetCol].fruitId
 		const newTexture = this.cropTypes[newTargetIndex]
 
-		if (this.gridInfo[targetRow][targetCol].fruit)
-			this.gridInfo[targetRow][targetCol].fruit.texture = newTexture // swap texture
+		if (this.grid.gridInfo[targetRow][targetCol].fruit) {
+			const tl = gsap.timeline({ ease: "power2.out" })
+			tl.to(this.grid.gridInfo[targetRow][targetCol].fruit, { duration: 0.8, pixi: { scale: 0.7 } }) // animation
+			this.grid.gridInfo[targetRow][targetCol].fruit.texture = newTexture // swap texture
+			tl.to(this.grid.gridInfo[targetRow][targetCol].fruit, { duration: 0.8, pixi: { scale: 0.6 } }) // animation
+		}
 
 
 		this.dragTarget.destroy()
-		console.log(row, col)
-		this.gridInfo[row][col].fruitId = -1
+		this.grid.gridInfo[row][col].fruitId = -1
+		const randomEmptyCell = this.randomEmptyCell()
+		this.grid.placeCrop(randomEmptyCell.row, randomEmptyCell.col, 0)
 
 
 		this.dragTarget = null
 		this.renderer.app.stage.off("pointermove", () => { this.moveDrag(this.dragTarget) })
+	}
+	randomEmptyCell() {
+		const gridSize = this.grid.gridSize
+		let emptyCells: { row: number, col: number }[] = []
+		for (let row = 0; row < gridSize; row++) {
+			for (let col = 0; col < gridSize; col++) {
+				if (this.grid.gridInfo[row][col].fruitId == -1)
+					emptyCells.push({ row, col })
+			}
+		}
+		const randomChoose = Math.floor(Math.random() * emptyCells.length)
+		return emptyCells[randomChoose]
 	}
 
 	moveDrag(sprite: SPRITE) {

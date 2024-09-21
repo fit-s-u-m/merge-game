@@ -80,8 +80,7 @@ export class Renderer {
 	) {
 		const sprite = this.createSprite(texture);
 
-		sprite.width = size * 0.6;
-		sprite.height = size * 0.6;
+		sprite.scale.set(0.6)
 		sprite.anchor.set(0.5, 0.5);
 
 		this.makeDraggable(crop, sprite);

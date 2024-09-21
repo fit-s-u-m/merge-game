@@ -11,7 +11,7 @@ export class Grid {
 	startX: number
 	startY: number
 	private grid: (size: number) => GRIDINFO = (size: number) => Array.from({ length: size }, () => Array(size).fill(0));
-	private gridInfo: GRIDINFO
+	gridInfo: GRIDINFO
 
 	constructor(renderer: RENDERER, gridSize: number = 5) {
 		this.renderer = renderer;
@@ -82,7 +82,6 @@ export class Grid {
 
 		this.gridInfo[row][col].fruit = cropSprite
 		this.gridInfo[row][col].fruitId = cropType
-		this.crop.gridInfo = this.gridInfo // send the info to crop
 
 		this.renderer.makeDraggable(this.crop, cropSprite);
 		this.renderer.stage(cropSprite);
