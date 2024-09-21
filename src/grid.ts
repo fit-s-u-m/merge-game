@@ -1,4 +1,4 @@
-import { GRIDINFO, RENDERER, SPRITE } from "../types";
+import { GRIDINFO, RENDERER, TEXTURE } from "../types";
 import { Crop } from "./crops";
 import gsap from "gsap";
 
@@ -10,7 +10,8 @@ export class Grid {
 	crop: Crop;
 	startX: number
 	startY: number
-	private GridInfo: GRIDINFO = Array(5).fill(Array(5).fill(0)) // create a five by five array of zeros
+	private grid: (size: number) => GRIDINFO = (size: number) => Array.from({ length: size }, () => Array(size).fill(0));
+	private gridInfo: GRIDINFO
 
 	constructor(renderer: RENDERER, gridSize: number = 5) {
 		this.renderer = renderer;
@@ -22,25 +23,30 @@ export class Grid {
 
 		this.startX = (this.renderer.app.screen.width - totalGridWidth) / 2;
 		this.startY = (this.renderer.app.screen.height - totalGridHeight) / 2;
-		this.crop = new Crop(renderer);
+		this.crop = new Crop(renderer, this);
+		this.gridInfo = this.grid(gridSize)
 	}
 
 	async init() {
+		const cropAssets = await this.crop.initAssets()
+		this.crop.cropTypes = cropAssets
+		const texturePath = "/assets/ui/cell-bg-2.png";
+		const textureCellBg = await this.renderer.loadAsset(texturePath);
 
 		for (let row = 0; row < this.gridSize; row++) {
 			for (let col = 0; col < this.gridSize; col++) {
-				await this.createGridCell(row, col, this.startX, this.startY);
+				this.createGridCell(row, col, this.startX, this.startY, textureCellBg);
 			}
 		}
 	}
-	async createGridCell(
+	createGridCell(
 		row: number,
 		col: number,
 		startX: number,
-		startY: number
-	): Promise<SPRITE> {
-		const texturePath = "/assets/ui/cell-bg-2.png";
-		const texture = await this.renderer.loadAsset(texturePath);
+		startY: number,
+		texture: TEXTURE
+
+	) {
 		const cellSprite = this.renderer.createSprite(texture);
 
 		cellSprite.width = this.cellSize;
@@ -51,53 +57,33 @@ export class Grid {
 
 		cellSprite.position.set(xPos, yPos);
 		this.renderer.stage(cellSprite);
-		this.GridInfo[row][col] = {
+		this.gridInfo[row][col] = {
 			x: xPos,
 			y: yPos,
 			cellSize: this.cellSize,
 			fruit: cellSprite,
 			fruitId: -1
 		}
-		console.log(this.GridInfo[row][col], row, col)
-		console.log(this.GridInfo[0][0], "00 grid")
-		console.log(this.GridInfo[0][1], "01 grid")
-		// console.log(this.GridInfo[0][0], row, col)
-
-
 
 		if (Math.random() > 0.5) { // random
-			await this.placeRandomCrop(row, col);
+			this.placeCrop(row, col, 0)
 		}
-
-		return cellSprite;
 	}
 
-	async placeRandomCrop(row: number, col: number) {
-		const cropType = this.crop.getFirstCropType();
-		this.GridInfo[row][col].fruitId = Object.keys(this.crop.cropTypes).indexOf(cropType)
-		await this.placeCrop(row, col, "lemon");
-	}
 
-	async placeCrop(row: number, col: number, cropType: string) {
-		const cropSprite = await this.renderer.createCropSprite(
-			this.crop,
-			cropType,
-			this.cellSize
-		);
-		const xPos =
-			(this.renderer.app.screen.width - this.gridSize * this.cellSize) / 2 +
-			col * (this.cellSize + this.margin) +
-			this.cellSize / 2;
-		const yPos =
-			(this.renderer.app.screen.height - this.gridSize * this.cellSize) / 2 +
-			row * (this.cellSize + this.margin) +
-			this.cellSize / 2;
+	placeCrop(row: number, col: number, cropType: number) {
+		if (!this.crop.cropTypes) return
+		const texture = this.crop.cropTypes[cropType]
+		const cropSprite = this.renderer.createCropSprite(this.crop, texture, this.cellSize)
+
+		const xPos = this.gridInfo[row][col].x + this.cellSize / 2
+		const yPos = this.gridInfo[row][col].y + this.cellSize / 2
 		gsap.to(cropSprite, { duration: 2, pixi: { positionX: xPos, positionY: yPos } })
 
-		this.GridInfo[row][col].fruit = cropSprite
-		this.crop.gridInfo = this.GridInfo // send the info to crop
+		this.gridInfo[row][col].fruit = cropSprite
+		this.gridInfo[row][col].fruitId = cropType
+		this.crop.gridInfo = this.gridInfo // send the info to crop
 
-		// cropSprite.position.set(xPos, yPos);
 		this.renderer.makeDraggable(this.crop, cropSprite);
 		this.renderer.stage(cropSprite);
 	}

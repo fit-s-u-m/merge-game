@@ -1,5 +1,5 @@
 import * as PIXI from "pixi.js";
-import { ELEMENT, SPRITE } from "../types.ts";
+import { ELEMENT, SPRITE, TEXTURE } from "../types.ts";
 import { Crop } from "./crops";
 import { PixiPlugin } from "gsap/PixiPlugin";
 import gsap from "gsap";
@@ -69,14 +69,15 @@ export class Renderer {
 	stage(...element: ELEMENT[]) {
 		element.forEach((element) => this.app.stage.addChild(element));
 	}
+	loadAssets(...params: string[]): Promise<any>[] {
+		return params.map(async (x) => await PIXI.Assets.load(x))
+	}
 
-	async createCropSprite(
+	createCropSprite(
 		crop: Crop,
-		type: string,
+		texture: TEXTURE,
 		size: number
-	): Promise<SPRITE> {
-		const texturePath = crop.getCropTexturePath(type);
-		const texture = await this.loadAsset(texturePath);
+	) {
 		const sprite = this.createSprite(texture);
 
 		sprite.width = size * 0.6;
