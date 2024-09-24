@@ -3,93 +3,113 @@ import gsap from "gsap";
 import { Grid } from "./grid";
 
 export class HomePage {
-    renderer: RENDERER;
-    backgroundSprite?: SPRITE;
-    playExitSprite?: SPRITE;
-    playButtonSprite?: any;
-    exitButtonSprite?: any;
-    
-    constructor(renderer: RENDERER) {
-        this.renderer = renderer;
-    }
+	renderer: RENDERER;
+	backgroundSprite?: SPRITE;
+	playExitSprite?: SPRITE;
+	playButtonSprite?: any;
+	exitButtonSprite?: any;
 
-    async init() {
-        // Load background and play/exit image using the renderer
-        const backgroundTexture = await this.renderer.loadAsset("/assets/ui/home-text.png");
-        const playExitTexture = await this.renderer.loadAsset("/assets/ui/home-page play button.png");
-        this.backgroundSprite = this.renderer.createSprite(backgroundTexture);
-        this.playExitSprite = this.renderer.createSprite(playExitTexture);
+	constructor(renderer: RENDERER) {
+		this.renderer = renderer;
+	}
 
-        // Set sizes for background and play/exit image
-        this.backgroundSprite.width = this.renderer.app.screen.width * 0.5;
-        this.backgroundSprite.height = this.renderer.app.screen.height * 0.5;
+	async init() {
+		// Load background and play/exit image using the renderer
+		const backgroundTexture = await this.renderer.loadAsset(
+			"/assets/ui/home-text.png"
+		);
+		const playExitTexture = await this.renderer.loadAsset(
+			"/assets/ui/home-page play button-2.png"
+		);
+		this.backgroundSprite = this.renderer.createSprite(backgroundTexture);
+		this.playExitSprite = this.renderer.createSprite(playExitTexture);
 
-        this.playExitSprite.scale.set(1.2);
-        this.backgroundSprite.scale.set(0.3);
+		this.backgroundSprite.width = this.renderer.app.screen.width * 0.5;
+		this.backgroundSprite.height = this.renderer.app.screen.height * 0.5;
 
-        // Position background and play/exit image
-        this.backgroundSprite.position.set(this.renderer.app.screen.width / 2, this.renderer.app.screen.height / 4);
-        this.backgroundSprite.anchor.set(0.5, 0.85);
+		this.playExitSprite.scale.set(1.2);
+		this.backgroundSprite.scale.set(0.3);
 
-        this.playExitSprite.position.set(this.renderer.app.screen.width / 2, this.renderer.app.screen.height / 2);
-        this.playExitSprite.anchor.set(0.5, 0.2);
+		// Position background and play/exit image
+		this.backgroundSprite.position.set(
+			this.renderer.app.screen.width / 2,
+			this.renderer.app.screen.height / 4
+		);
+		this.backgroundSprite.anchor.set(0.5, 0.85);
 
-        // Make the play/exit image interactive
-        this.playExitSprite.interactive = true;
-        this.playExitSprite.buttonMode = true;
+		this.playExitSprite.position.set(
+			this.renderer.app.screen.width / 2,
+			this.renderer.app.screen.height / 2
+		);
+		this.playExitSprite.anchor.set(0.5, 0.2);
 
-        // Stage background and play/exit image
-        this.renderer.stage(this.backgroundSprite, this.playExitSprite);
+		this.playExitSprite.interactive = true;
+		this.playExitSprite.buttonMode = true;
 
-        // Create Play and Exit buttons using the renderer
-        this.playButtonSprite = this.renderer.createButton(0, 0, 400, 150, () => this.onPlayClick());
-        this.exitButtonSprite = this.renderer.createButton(0, 0, 250, 80, () => this.onExitClick());
+		this.renderer.stage(this.backgroundSprite, this.playExitSprite);
 
-        // Add buttons to the stage
-        this.renderer.stage(this.playButtonSprite, this.exitButtonSprite);
+		this.playButtonSprite = this.renderer.createButton(0, 0, 400, 150, () =>
+			this.onPlayClick()
+		);
+		this.exitButtonSprite = this.renderer.createButton(0, 0, 250, 80, () =>
+			this.onExitClick()
+		);
 
-        // Initial update of button positions based on the play/exit image
-        this.updateButtonPositions();
+		this.renderer.stage(this.playButtonSprite, this.exitButtonSprite);
 
-        // Recalculate positions on window resize
-        window.addEventListener('resize', () => this.updateButtonPositions());
-    }
+		this.updateButtonPositions();
 
-    // Dynamically update button positions based on play/exit image
-    updateButtonPositions() {
-        if (!this.playExitSprite || !this.playButtonSprite || !this.exitButtonSprite) return;
+		window.addEventListener("resize", () => this.updateButtonPositions());
+	}
 
-        // Align the buttons based on the play/exit image's current position and size
-        const playButtonX = this.playExitSprite.position.x - (this.playExitSprite.width / 2) + 120; // Adjust as needed
-        const playButtonY = this.playExitSprite.position.y + 80; // Adjust as needed
+	updateButtonPositions() {
+		if (
+			!this.playExitSprite ||
+			!this.playButtonSprite ||
+			!this.exitButtonSprite
+		)
+			return;
 
-        const exitButtonX = this.playExitSprite.position.x - (this.playExitSprite.width / 2) + 190; // Adjust as needed
-        const exitButtonY = this.playExitSprite.position.y + 320; // Adjust as needed
+		const playButtonX =
+			this.playExitSprite.position.x - this.playExitSprite.width / 2 + 120;
+		const playButtonY = this.playExitSprite.position.y + 80;
 
-        // Set the position of the buttons to follow the play/exit image
-        this.playButtonSprite.position.set(playButtonX, playButtonY);
-        this.exitButtonSprite.position.set(exitButtonX, exitButtonY);
-    }
+		const exitButtonX =
+			this.playExitSprite.position.x - this.playExitSprite.width / 2 + 190;
+		const exitButtonY = this.playExitSprite.position.y + 320;
 
-    onPlayClick() {
-        console.log("Play button clicked");
-     this.renderer.app.stage.removeChild(this.playButtonSprite);
-     this.renderer.app.stage.removeChild(this.exitButtonSprite);
-        if (this.playExitSprite) {
-            gsap.to(this.playExitSprite, { duration: 1, alpha: 0, onComplete: () => this.startGame() });
-        } else {
-            console.error("playExitSprite is undefined");
-        }
-    }
+		this.playButtonSprite.position.set(playButtonX, playButtonY);
+		this.exitButtonSprite.position.set(exitButtonX, exitButtonY);
+	}
 
-    onExitClick() {
-        console.log("Exit button clicked");
-    }
+	onPlayClick() {
+		console.log("Play button clicked");
+		this.renderer.app.stage.removeChild(this.playButtonSprite);
+		this.renderer.app.stage.removeChild(this.exitButtonSprite);
+		if (this.playExitSprite) {
+			gsap.to(this.playExitSprite, {
+				duration: 1,
+				alpha: 0,
+				onComplete: () => this.startGame(),
+			});
+		} else {
+			console.error("playExitSprite is undefined");
+		}
+	}
 
-    startGame() {
-        console.log("Starting the game...");
-        gsap.set(this.renderer.app.stage, { alpha: 1 });
-        const grid = new Grid(this.renderer);
-        grid.init();
-    }
+	onExitClick() {
+		console.log("Exit button clicked");
+		
+		if (confirm("Are you sure you want to exit the game?")) {
+			window.close();  // May not work in most browsers
+			window.location.href = 'https://your-homepage.com';  
+		}
+	}
+	
+	startGame() {
+		console.log("Starting the game...");
+		gsap.set(this.renderer.app.stage, { alpha: 1 });
+		const grid = new Grid(this.renderer);
+		grid.init();
+	}
 }
