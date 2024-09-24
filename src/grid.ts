@@ -23,7 +23,7 @@ export class Grid {
 		const totalGridHeight = this.gridSize * this.cellSize;
 
 		this.startX = (this.renderer.app.screen.width - totalGridWidth) / 2;
-		this.startY = (this.renderer.app.screen.height - totalGridHeight) / 2;
+		this.startY = (this.renderer.app.screen.height - totalGridHeight) / 2 +100;
 		this.crop = new Crop(renderer, this);
 		this.gridInfo = this.grid(gridSize)
 	}

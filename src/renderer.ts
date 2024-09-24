@@ -10,6 +10,8 @@ gsap.registerPlugin(PixiPlugin)
 export class Renderer {
 	app: PIXI.Application;
 	dragger: any
+	playButtonSprite?: PIXI.Graphics;
+    exitButtonSprite?: PIXI.Graphics;
 
 	constructor() {
 		this.app = new PIXI.Application();
@@ -67,6 +69,40 @@ export class Renderer {
 
 	createSprite(texture: PIXI.Texture): PIXI.Sprite {
 		return new PIXI.Sprite(texture);
+	}
+	    // Set up the home screen and return the sprites for positioning in HomePage.ts
+		async createHomeScreenAssets(
+			backgroundPath: string,
+			playExitImagePath: string
+		): Promise<{ backgroundSprite: PIXI.Sprite, playExitSprite: PIXI.Sprite }> {
+			const backgroundTexture = await this.loadAsset(backgroundPath);
+			const playExitTexture = await this.loadAsset(playExitImagePath);
+	
+			const backgroundSprite = this.createSprite(backgroundTexture);
+			const playExitSprite = this.createSprite(playExitTexture);
+	
+			this.stage(backgroundSprite, playExitSprite);
+			return { backgroundSprite, playExitSprite };
+		}
+
+		
+    // Create an invisible button sprite on top of a target area
+	createButton(x: number, y: number, width: number, height: number, callback: () => void): PIXI.Graphics {
+		const buttonSprite = new PIXI.Graphics();
+		buttonSprite.fill({color:0xFF0000, alpha:10}); // Transparent fill
+		buttonSprite.rect(0, 0, width, height); // Create button based on width and height
+		buttonSprite.fill();
+	
+		buttonSprite.position.set(x, y); // Set position of the button
+		buttonSprite.interactive = true; // Make it interactive
+	
+		// Set the cursor style to "pointer" to simulate button behavior
+		buttonSprite.cursor = 'pointer';
+	
+		// Attach the click event
+		buttonSprite.on('pointerdown', callback);
+	
+		return buttonSprite;
 	}
 
 	stage(...element: ELEMENT[]) {

@@ -7,6 +7,7 @@ export interface ExtendedSprite extends PIXI.Sprite {
 	dragging?: boolean;
 	originalPosition?: { x: number; y: number };
 	dragOffset?: { x: number; y: number };
+	buttonMode?: boolean;
 }
 
 export type ELEMENT = PIXI.Sprite | PIXI.Text | PIXI.Container | PIXI.Graphics;
