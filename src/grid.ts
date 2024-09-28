@@ -1,8 +1,9 @@
 import { GRIDINFO, RENDERER, SPRITE, TEXTURE } from "../types";
 import { Crop } from "./crops";
-import gsap from "gsap";
+import { Spawn } from "./utils/animation";
+import { resizeable } from "./utils/resizeable";
 
-export class Grid {
+export class Grid implements resizeable {
 	renderer: RENDERER;
 	gridSize: number;
 	cellSize: number;
@@ -13,14 +14,17 @@ export class Grid {
 	private grid: (size: number) => GRIDINFO = (size: number) => Array.from({ length: size }, () => Array(size).fill(0));
 	gridInfo: GRIDINFO
 	cropCells: SPRITE[] = []
+	miniCellSize = 30
+	spawnAnimation: any
+	resizeCalled = false
 
 	constructor(renderer: RENDERER, gridSize: number = 5) {
 		this.renderer = renderer;
 		this.gridSize = gridSize;
 		this.cellSize = 150;
 		this.margin = 15;
-		const totalGridWidth = this.gridSize * this.cellSize;
-		const totalGridHeight = this.gridSize * this.cellSize;
+		const totalGridWidth = this.gridSize * (this.cellSize + this.margin);
+		const totalGridHeight = this.gridSize * (this.cellSize + this.margin);
 
 		this.startX = (this.renderer.app.screen.width - totalGridWidth) / 2;
 		this.startY = (this.renderer.app.screen.height - totalGridHeight) / 2;
@@ -73,7 +77,7 @@ export class Grid {
 	}
 
 
-	placeCrop(row: number, col: number, cropType: number) {
+	async placeCrop(row: number, col: number, cropType: number) {
 		if (!this.crop.cropTypes) return
 		const texture = this.crop.cropTypes[cropType]
 		const cropSprite = this.renderer.createCropSprite(this.crop, texture)
@@ -81,12 +85,48 @@ export class Grid {
 
 		const xPos = this.gridInfo[row][col].x + this.cellSize / 2
 		const yPos = this.gridInfo[row][col].y + this.cellSize / 2
-		gsap.to(cropSprite, { duration: 2, pixi: { positionX: xPos, positionY: yPos } })
+
+		this.renderer.makeDraggable(this.crop, cropSprite);
+		this.renderer.stage(cropSprite);
 
 		this.gridInfo[row][col].fruit = cropSprite
 		this.gridInfo[row][col].fruitId = cropType
 
-		this.renderer.makeDraggable(this.crop, cropSprite);
-		this.renderer.stage(cropSprite);
+		await Spawn(cropSprite, xPos, yPos)
+
+	}
+	resize(width: number, height: number, scale: number = 1): void {
+
+		for (let row = 0; row < this.gridSize; row++) {
+			for (let col = 0; col < this.gridSize; col++) {
+				this.cellSize = 150
+				this.margin = 15;
+				const fruitScale = 0.5
+				const totalGridWidth = this.gridSize * (this.cellSize + this.margin)
+				const totalGridHeight = this.gridSize * (this.cellSize + this.margin)
+
+				const startX = (width - totalGridWidth) / 2;
+				const startY = (height - totalGridHeight) / 2;
+
+				const xPos = startX + col * (this.cellSize + this.margin);
+				const yPos = startY + row * (this.cellSize + this.margin);
+
+				const xCropPos = xPos + this.cellSize / 2
+				const yCropPos = yPos + this.cellSize / 2
+				this.gridInfo[row][col].x = xPos
+				this.gridInfo[row][col].y = yPos
+				const fruit = this.gridInfo[row][col].fruit
+				const arrIndex = row * this.gridSize + col
+				const cell = this.cropCells[arrIndex]
+
+				if (fruit) {
+					cell.width = this.cellSize
+					cell.height = this.cellSize
+					Spawn(fruit, xCropPos, yCropPos)
+					Spawn(cell, xPos, yPos)
+				}
+
+			}
+		}
 	}
 }

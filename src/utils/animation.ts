@@ -2,6 +2,7 @@ import gsap from 'gsap';
 import { PixiPlugin } from "gsap/PixiPlugin";
 import { randomRange } from './random';
 import * as PIXI from "pixi.js";
+import { SPRITE } from '../../types';
 
 PixiPlugin.registerPIXI(PIXI);
 gsap.registerPlugin(PixiPlugin)
@@ -24,29 +25,21 @@ export function resumeTweens(targets: gsap.TweenTarget) {
     const tweens = gsap.getTweensOf(targets);
     for (const tween of tweens) tween.resume();
 }
-export function scaleAnimation(target: any, scale: number) {
-    gsap.to(target, {
+export async function scaleAnimation(target: any, scale: number) {
+    await gsap.to(target, {
         duration: 0.1,
         ease: "power4.out",
         pixi: { scale },
         yoyo: true,
         repeat: 1
     })
-
 }
-export function spreadAnimation(targets: any[], arrIndex: number, size: number) { // 2d Arr put in one arr
-    const tl = gsap.timeline()
-    tl.to(targets, {
-        duration: 0.07,
-        ease: "power4.in",
-        pixi: { alpha: 0.7 },
-        stagger: { from: arrIndex, each: 0.05, grid: [size, size] },
-    })
-    tl.to(targets, {
-        duration: 0.07,
-        ease: "power4.out",
-        pixi: { alpha: 1 },
-        stagger: { from: arrIndex, each: 0.05, grid: [size, size] },
+export async function spreadAnimation(targets: any[], arrIndex: number, size: number) { // 2d Arr put in one arr
+    await gsap.from(targets, {
+        duration: 0.1,
+        ease: "power1.out",
+        pixi: { alpha: 0.65 },
+        stagger: { from: arrIndex, each: 0.1, grid: [size, size] },
     })
 }
 
@@ -63,4 +56,11 @@ export async function earthquake(target: { x: number; y: number }, power = 8, du
         },
     });
 }
+export async function Spawn(target: SPRITE, xPos: number, yPos: number) {
+    gsap.to(target.position, { duration: 2, x: xPos, y: yPos })
+}
+export async function SpawnStagger(target: SPRITE[], xPos: number, yPos: number, size = 5) {
+    gsap.to(target, { duration: 2, pixi: { positionX: "+=i", positionY: yPos }, stagger: { grid: [size, size], each: 0.1 } })
+}
+
 
