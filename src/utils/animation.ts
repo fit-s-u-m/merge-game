@@ -38,7 +38,7 @@ export async function spreadAnimation(targets: any[], arrIndex: number, size: nu
     await gsap.from(targets, {
         duration: 0.1,
         ease: "power1.out",
-        pixi: { alpha: 0.65 },
+        pixi: { alpha: 0.68 },
         stagger: { from: arrIndex, each: 0.1, grid: [size, size] },
     })
 }

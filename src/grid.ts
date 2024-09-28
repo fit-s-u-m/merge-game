@@ -99,7 +99,7 @@ export class Grid implements resizeable {
 
 		for (let row = 0; row < this.gridSize; row++) {
 			for (let col = 0; col < this.gridSize; col++) {
-				this.cellSize = 150
+				this.cellSize = 150 * scale
 				this.margin = 15;
 				const fruitScale = 0.5
 				const totalGridWidth = this.gridSize * (this.cellSize + this.margin)
