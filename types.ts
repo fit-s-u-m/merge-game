@@ -26,3 +26,9 @@ export type SPRITESHEET = PIXI.Spritesheet;
 export type GRIDINFO = FruitINFO[][];
 export type VECTOR = PIXI.Point;
 export type CONTAINER = PIXI.Container;
+export type CELLPOS = {
+	x: number,
+	y: number,
+	row: number,
+	col: number
+}

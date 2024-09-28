@@ -1,6 +1,7 @@
-import { RENDERER, SPRITE, TEXTURE } from "../types";
+import { CELLPOS, RENDERER, SPRITE, TEXTURE, VECTOR } from "../types";
 import { Grid } from "./grid";
-import gsap from "gsap";
+import { randomEmptyCell } from "./utils/random";
+import { scaleAnimation, spreadAnimation } from "./utils/animation";
 
 export class Crop {
 	renderer: RENDERER;
@@ -43,104 +44,109 @@ export class Crop {
 		};
 		this.renderer.app.stage.on("pointermove", () => { this.moveDrag(sprite) })
 	}
-
-	async endDrag() {
-		if (!this.dragTarget) return
-
-		const returnToOriginal = () => {
-			if (this.dragTarget.originalPosition) {
-				this.dragTarget.position.set(
-					this.dragTarget.originalPosition.x,
-					this.dragTarget.originalPosition.y
-				);
-			}
-			return
+	returnToOriginal(target: SPRITE) {
+		return () => {
+			if (target.originalPosition)
+				target.position.set(
+					target.originalPosition.x,
+					target.originalPosition.y
+				)
 		}
 
+	}
+	getGridRelativePosition(position: VECTOR, cellSize: number) {
+		const gridTopLeftCell = this.grid.gridInfo[0][0]
+		const x = position.x - gridTopLeftCell.x
+		const y = position.y - gridTopLeftCell.y
+		return {
+			x,
+			y,
+			row: Math.floor(y / cellSize),
+			col: Math.floor(x / cellSize)
+		}
+
+	}
+	checkOutOfBounds(Xposition: number, Yposition: number, gridBorder: number) {
+		return Xposition < 0 || Yposition < 0 || Yposition > gridBorder || Xposition > gridBorder
+	}
+	getGridInfo(row: number, col: number) {
+		return this.grid.gridInfo[row][col]
+	}
+	isValidMove() {
+		const numRow = this.grid.gridInfo[0].length
+		const cellSize = this.grid.gridInfo[0][0].cellSize
+		const gridEndPos = cellSize * numRow
+
+		const currentPos = this.getGridRelativePosition(this.dragTarget.position, cellSize)
+		const prevPos = this.getGridRelativePosition(this.dragTarget.originalPosition, cellSize)
+		const outOfBound = this.checkOutOfBounds(currentPos.x, currentPos.y, gridEndPos)
+		if (outOfBound) return false
+		console.log(currentPos.row, currentPos.col)
+		if (currentPos.row >= numRow || currentPos.col >= numRow) return false
+
+
+		const targetIndex = this.getGridInfo(currentPos.row, currentPos.col).fruitId
+		const dragIndex = this.getGridInfo(prevPos.row, prevPos.col).fruitId
+
+		const inSamePos = currentPos.row == prevPos.row && currentPos.col == prevPos.col
+		const areDifferentFruits = dragIndex != targetIndex || targetIndex == -1
+		return !(inSamePos || areDifferentFruits)
+	}
+
+	merge(prevPos: CELLPOS, currPos: CELLPOS) {
+		const target = this.getGridInfo(currPos.row, currPos.col)
+		const targetFruit = target.fruit
+		if (!targetFruit || !this.cropTypes) return
+		scaleAnimation(targetFruit, 0.8)
+
+		const targets = this.grid.cropCells
+		if (!targets) return
+		const arrIndex = (currPos.row * this.grid.gridSize) + currPos.col
+		const targetIndex = target.fruitId
+		const texture = this.cropTypes[targetIndex]
+
+		spreadAnimation(targets, arrIndex, this.grid.gridSize)
+
+		targetFruit.texture = texture // swap texture
+		this.getGridInfo(prevPos.row, prevPos.col).fruitId = -1
+	}
+	async endDrag() {
+		if (!this.dragTarget) return
+		if (!this.grid.gridInfo || !this.cropTypes) return
+
+		// default values
 		this.dragTarget.dragging = false;
 		this.dragTarget.data = undefined;
 		this.dragTarget.alpha = 1;
 		this.dragTarget.zindex = 0;
 
-		if (!this.grid.gridInfo || !this.cropTypes) return
-
-		const localPosX = this.dragTarget.position.x - this.grid.gridInfo[0][0].x
-		const localPosY = this.dragTarget.position.y - this.grid.gridInfo[0][0].y
-		const prevLocalPosX = this.dragTarget.originalPosition.x - this.grid.gridInfo[0][0].x
-		const prevLocalPosY = this.dragTarget.originalPosition.y - this.grid.gridInfo[0][0].y
-		const numRow = this.grid.gridInfo[0].length
+		const returnToOriginal = this.returnToOriginal(this.dragTarget)
 		const cellSize = this.grid.gridInfo[0][0].cellSize
-		const gridBorder = cellSize * numRow
-		if (localPosX < 0 || localPosY < 0 || localPosY > gridBorder || localPosX > gridBorder) // out of grid
+
+		const currentPos = this.getGridRelativePosition(this.dragTarget.position, cellSize)
+		const prevPos = this.getGridRelativePosition(this.dragTarget.originalPosition, cellSize)
+		if (!this.isValidMove())
 			return returnToOriginal()
+		const targetRow = currentPos.row
+		const targetCol = currentPos.col
 
-		// calculate row and col for target and current
-		const targetRow = Math.floor(localPosY / cellSize)
-		const targetCol = Math.floor(localPosX / cellSize)
-		const row = Math.floor(prevLocalPosY / cellSize)
-		const col = Math.floor(prevLocalPosX / cellSize)
-		if (targetRow == row && col == targetCol) return returnToOriginal() // if it is in the same grid cell
-		console.log(targetRow, targetCol)
 
-		const targetIndex = this.grid.gridInfo[targetRow][targetCol].fruitId
-		const currIndex = this.grid.gridInfo[row][col].fruitId
+		const currIndex = this.getGridInfo(prevPos.row, prevPos.col).fruitId
+		const targetIndex = this.getGridInfo(targetRow, targetCol).fruitId
 
-		if (currIndex != targetIndex || targetIndex == -1) return returnToOriginal()
+		// game logic
 		if (targetIndex + currIndex < this.cropTypes.length)
-			this.grid.gridInfo[targetRow][targetCol].fruitId += 1
-
-		const newTargetIndex = this.grid.gridInfo[targetRow][targetCol].fruitId
-		const newTexture = this.cropTypes[newTargetIndex]
+			this.getGridInfo(targetRow, targetCol).fruitId += 1
 		this.dragTarget.destroy()
+		this.merge(prevPos, currentPos)
 
-		if (this.grid.gridInfo[targetRow][targetCol].fruit) {
+		const randomEmptyCells = randomEmptyCell(this.grid.gridInfo, "fruitId")
+		this.grid.placeCrop(randomEmptyCells.row, randomEmptyCells.col, 0)
 
-			const targets = this.grid.cropCells
-			const arrIndex = (targetRow * this.grid.gridSize) + targetCol
-			gsap.to(targets, {
-				duration: 0.15,
-				ease: "power1.out",
-				pixi: { alpha: 0.7 },
-				stagger: { from: arrIndex, each: 0.08, grid: [5, 5] },
-				repeat: 1,
-				yoyo: true,
-			})
-			this.grid.gridInfo[targetRow][targetCol].fruit.texture = newTexture // swap texture
-		}
-
-
-		this.grid.gridInfo[row][col].fruitId = -1
-		const randomEmptyCell = this.randomEmptyCell()
-		this.grid.placeCrop(randomEmptyCell.row, randomEmptyCell.col, 0)
-
-
+		// remove dragging
 		this.dragTarget = null
 		this.renderer.app.stage.off("pointermove", () => { this.moveDrag(this.dragTarget) })
 	}
-	getNonEmptyCell(): { row: number, col: number }[] {
-		const gridSize = this.grid.gridSize
-		let cells: { row: number, col: number }[] = []
-		for (let row = 0; row < gridSize; row++) {
-			for (let col = 0; col < gridSize; col++) {
-				if (this.grid.gridInfo[row][col].fruitId != -1)
-					cells.push({ row, col })
-			}
-		}
-		return cells
-	}
-	randomEmptyCell() {
-		const gridSize = this.grid.gridSize
-		let emptyCells: { row: number, col: number }[] = []
-		for (let row = 0; row < gridSize; row++) {
-			for (let col = 0; col < gridSize; col++) {
-				if (this.grid.gridInfo[row][col].fruitId == -1)
-					emptyCells.push({ row, col })
-			}
-		}
-		const randomChoose = Math.floor(Math.random() * emptyCells.length)
-		return emptyCells[randomChoose]
-	}
-
 	moveDrag(sprite: SPRITE) {
 		if (sprite.dragging && sprite.data) {
 			const newPosition = sprite.data.getLocalPosition(sprite.parent);
