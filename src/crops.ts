@@ -5,24 +5,26 @@ import { scaleAnimation, spreadAnimation } from "./utils/animation";
 
 export class Crop {
 	renderer: RENDERER;
-	cropTypes?: TEXTURE[]
-	dragTarget: any
-	grid: Grid
+	cropTypes?: TEXTURE[];
+	dragTarget: any;
+	grid: Grid;
 	constructor(renderer: RENDERER, grid: Grid) {
 		this.renderer = renderer;
-		this.grid = grid
+		this.grid = grid;
 	}
 	initAssets() {
-		return Promise.all(this.renderer.loadAssets(
-			"/assets/ui/crops/apple.png",
-			"/assets/ui/crops/orange2.png",
-			"/assets/ui/crops/lemon5.png",
-			"/assets/ui/crops/capsicum.png",
-			"/assets/ui/crops/carrot.png",
-			"/assets/ui/crops/egg-plant.png",
-			"/assets/ui/crops/mango.png",
-			"/assets/ui/crops/strawberry.png",
-		))
+		return Promise.all(
+			this.renderer.loadAssets(
+				"/merge-game/assets/ui/crops/apple.png",
+				"/merge-game/assets/ui/crops/orange2.png",
+				"/merge-game/assets/ui/crops/lemon5.png",
+				"/merge-game/assets/ui/crops/capsicum.png",
+				"/merge-game/assets/ui/crops/carrot.png",
+				"/merge-game/assets/ui/crops/egg-plant.png",
+				"/merge-game/assets/ui/crops/mango.png",
+				"/merge-game/assets/ui/crops/strawberry.png"
+			)
+		);
 	}
 
 	//  starting the drag
@@ -31,18 +33,20 @@ export class Crop {
 		sprite.dragging = true;
 		sprite.alpha = 0.5;
 		sprite.zIndex = 50;
-		this.renderer.dragger = this
-		this.dragTarget = sprite
+		this.renderer.dragger = this;
+		this.dragTarget = sprite;
 
 		sprite.originalPosition = { x: sprite.x, y: sprite.y };
-		if (!sprite.data) return
+		if (!sprite.data) return;
 
 		const newPosition = sprite.data.getLocalPosition(sprite.parent);
 		sprite.dragOffset = {
 			x: sprite.x - newPosition.x,
 			y: sprite.y - newPosition.y,
 		};
-		this.renderer.app.stage.on("pointermove", () => { this.moveDrag(sprite) })
+		this.renderer.app.stage.on("pointermove", () => {
+			this.moveDrag(sprite);
+		});
 	}
 	returnToOriginal(target: SPRITE) {
 		return () => {

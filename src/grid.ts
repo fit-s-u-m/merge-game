@@ -8,35 +8,43 @@ export class Grid {
 	cellSize: number;
 	margin: number; // Space between cells
 	crop: Crop;
-	startX: number
-	startY: number
-	private grid: (size: number) => GRIDINFO = (size: number) => Array.from({ length: size }, () => Array(size).fill(0));
-	gridInfo: GRIDINFO
-	cropCells: SPRITE[] = []
+	startX: number;
+	startY: number;
+	private grid: (size: number) => GRIDINFO = (size: number) =>
+		Array.from({ length: size }, () => Array(size).fill(0));
+	gridInfo: GRIDINFO;
+	cropCells: SPRITE[] = [];
 
 	constructor(renderer: RENDERER, gridSize: number = 5) {
 		this.renderer = renderer;
 		this.gridSize = gridSize;
-		this.cellSize = 150;
+		this.cellSize = 130;
 		this.margin = 15;
 		const totalGridWidth = this.gridSize * this.cellSize;
 		const totalGridHeight = this.gridSize * this.cellSize;
 
 		this.startX = (this.renderer.app.screen.width - totalGridWidth) / 2;
-		this.startY = (this.renderer.app.screen.height - totalGridHeight) / 2;
+		this.startY =
+			(this.renderer.app.screen.height - totalGridHeight) / 2 + 130;
 		this.crop = new Crop(renderer, this);
-		this.gridInfo = this.grid(gridSize)
+		this.gridInfo = this.grid(gridSize);
 	}
 
 	async init() {
-		const cropAssets = await this.crop.initAssets()
-		this.crop.cropTypes = cropAssets
-		const texturePath = "/assets/ui/cell-bg-2.png";
+		const cropAssets = await this.crop.initAssets();
+		this.crop.cropTypes = cropAssets;
+		const texturePath = "/merge-game/assets/ui/cell-bg-2.png";
 		const textureCellBg = await this.renderer.loadAsset(texturePath);
 
 		for (let row = 0; row < this.gridSize; row++) {
 			for (let col = 0; col < this.gridSize; col++) {
-				this.createGridCell(row, col, this.startX, this.startY, textureCellBg);
+				this.createGridCell(
+					row,
+					col,
+					this.startX,
+					this.startY,
+					textureCellBg
+				);
 			}
 		}
 	}
@@ -46,7 +54,6 @@ export class Grid {
 		startX: number,
 		startY: number,
 		texture: TEXTURE
-
 	) {
 		const cellSprite = this.renderer.createSprite(texture);
 
@@ -57,34 +64,37 @@ export class Grid {
 		const yPos = startY + row * (this.cellSize + this.margin);
 
 		cellSprite.position.set(xPos, yPos);
-		this.cropCells.push(cellSprite)
+		this.cropCells.push(cellSprite);
 		this.renderer.stage(cellSprite);
 		this.gridInfo[row][col] = {
 			x: xPos,
 			y: yPos,
 			cellSize: this.cellSize,
 			fruit: cellSprite,
-			fruitId: -1
-		}
+			fruitId: -1,
+		};
 
-		if (Math.random() > 0.5) { // random
-			this.placeCrop(row, col, 0)
+		if (Math.random() > 0.5) {
+			// random
+			this.placeCrop(row, col, 0);
 		}
 	}
 
-
 	placeCrop(row: number, col: number, cropType: number) {
-		if (!this.crop.cropTypes) return
-		const texture = this.crop.cropTypes[cropType]
-		const cropSprite = this.renderer.createCropSprite(this.crop, texture)
-		cropSprite.zIndex = 100
+		if (!this.crop.cropTypes) return;
+		const texture = this.crop.cropTypes[cropType];
+		const cropSprite = this.renderer.createCropSprite(this.crop, texture);
+		cropSprite.zIndex = 100;
 
-		const xPos = this.gridInfo[row][col].x + this.cellSize / 2
-		const yPos = this.gridInfo[row][col].y + this.cellSize / 2
-		gsap.to(cropSprite, { duration: 2, pixi: { positionX: xPos, positionY: yPos } })
+		const xPos = this.gridInfo[row][col].x + this.cellSize / 2;
+		const yPos = this.gridInfo[row][col].y + this.cellSize / 2;
+		gsap.to(cropSprite, {
+			duration: 2,
+			pixi: { positionX: xPos, positionY: yPos },
+		});
 
-		this.gridInfo[row][col].fruit = cropSprite
-		this.gridInfo[row][col].fruitId = cropType
+		this.gridInfo[row][col].fruit = cropSprite;
+		this.gridInfo[row][col].fruitId = cropType;
 
 		this.renderer.makeDraggable(this.crop, cropSprite);
 		this.renderer.stage(cropSprite);
