@@ -1,5 +1,4 @@
 import { Renderer } from "./renderer";
-import { Grid } from "./grid";
 import { resizeable } from "./utils/resizeable";
 let resizeables: resizeable[] = []
 
@@ -17,17 +16,20 @@ function resize() {
 	const height = windowHeight;
 
 	window.scrollTo(0, 0);
-	resizeables.forEach(x => x.resize(width, height, scale))
+	resizeables.forEach(x => x.resize(width, height))
 }
 
+// import { Grid } from "./grid";
+
+import { HomePage } from "./homepage";
 
 async function main() {
 	const renderer = new Renderer();
 	await renderer.init();
-	const grid = new Grid(renderer);
-	await grid.init();
-	resizeables.push(grid)
 	resizeables.push(renderer)
 	window.addEventListener("resize", resize)
+	const homePage = new HomePage(renderer);
+	await homePage.init();
+	resizeables.push(homePage)
 }
 main();

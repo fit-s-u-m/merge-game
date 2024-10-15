@@ -1,3 +1,3 @@
 export interface resizeable {
-    resize(width: number, height: number, scale: number): void
+    resize(width: number, height: number): void
 }
