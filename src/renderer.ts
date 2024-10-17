@@ -14,6 +14,8 @@ export class Renderer implements resizeable {
 
 	constructor() {
 		this.app = new PIXI.Application();
+		this.background = new PIXI.Sprite()
+		this.backgroundOverlay = new PIXI.Graphics();
 	}
 
 	async init() {
@@ -90,7 +92,8 @@ export class Renderer implements resizeable {
 	): PIXI.Graphics {
 		const buttonSprite = new PIXI.Graphics();
 		//TODO: calculate the raduis propely
-		const radius = Math.max(width, height) / Math.min(width, height)
+		//
+		// const radius = Math.max(width, height) / Math.min(width, height)
 
 		buttonSprite.alpha = 0
 		buttonSprite.roundRect(0, 0, width, height, 20); // Create button based on width and height

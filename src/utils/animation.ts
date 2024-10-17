@@ -59,7 +59,7 @@ export async function earthquake(target: { x: number; y: number }, power = 8, du
 export async function Spawn(target: SPRITE, xPos: number, yPos: number) {
     gsap.to(target.position, { duration: 2, x: xPos, y: yPos })
 }
-export async function SpawnStagger(target: SPRITE[], xPos: number, yPos: number, size = 5) {
+export async function SpawnStagger(target: SPRITE[], yPos: number, size = 5) {
     gsap.to(target, { duration: 2, pixi: { positionX: "+=i", positionY: yPos }, stagger: { grid: [size, size], each: 0.1 } })
 }
 
